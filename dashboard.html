@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - Online Store</title>
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
+
+<body>
+
+  <div class="dashboard">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <h2>Admin Panel</h2>
+
+      <a href="#" class="active">Dashboard</a>
+      <a href="#products">Manage Products</a>
+      <a href="#orders">View Orders</a>
+
+      <button id="logoutBtn">Logout</button>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="content">
+      <header class="topbar">
+        <h1>Dashboard</h1>
+        <p>Welcome, <span id="adminName"></span> 👋</p>
+      </header>
+
+      <!-- STATS -->
+      <section class="stats">
+        <div class="stat-card">
+          <h3>Total Products</h3>
+          <p id="totalProducts">0</p>
+        </div>
+
+        <div class="stat-card">
+          <h3>Total Orders</h3>
+          <p id="totalOrders">0</p>
+        </div>
+
+        <div class="stat-card">
+          <h3>Total Revenue</h3>
+          <p id="totalRevenue">$0</p>
+        </div>
+      </section>
+
+      <!-- ADD PRODUCT -->
+      <section class="add-product" id="products">
+        <h2>Add New Product</h2>
+
+        <form id="productForm">
+          <input type="text" id="productName" placeholder="Product Name" required />
+          <input type="number" id="productPrice" placeholder="Price" required />
+          <input type="text" id="productCategory" placeholder="Category (women/men/couple)" required />
+          <input type="text" id="productImage" placeholder="Image file (example: girl.jpg)" required />
+          <textarea id="productDesc" placeholder="Description" required></textarea>
+
+          <button type="submit">Add Product</button>
+        </form>
+
+        <p id="productMsg"></p>
+      </section>
+
+      <!-- PRODUCT LIST -->
+      <section class="product-list">
+        <h2>Products List</h2>
+        <div id="productsContainer"></div>
+      </section>
+
+      <!-- ORDERS -->
+      <section class="orders" id="orders">
+        <h2>Orders</h2>
+        <div id="ordersContainer"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
