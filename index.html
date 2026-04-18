@@ -98,21 +98,46 @@
   <section class="products" id="products">
     <div class="products-top">
       <h2 class="section-title">Products</h2>
+      <p class="products-subtitle" id="productCountLabel" aria-live="polite"></p>
 
-      <div class="filters">
-        <button class="filter-btn active" data-filter="all">All</button>
-        <button class="filter-btn" data-filter="women">Women</button>
-        <button class="filter-btn" data-filter="men">Men</button>
-        <button class="filter-btn" data-filter="couple">Couple</button>
-      </div>
+      <div class="product-toolbar" aria-label="Filter and sort products">
+        <div class="toolbar-block toolbar-block--filters">
+          <span class="toolbar-heading" id="categoryFilterLabel">Category</span>
+          <div
+            class="filter-segment"
+            role="group"
+            aria-labelledby="categoryFilterLabel"
+          >
+            <button type="button" class="filter-btn active" data-filter="all">
+              All
+            </button>
+            <button type="button" class="filter-btn" data-filter="women">
+              Women
+            </button>
+            <button type="button" class="filter-btn" data-filter="men">
+              Men
+            </button>
+            <button type="button" class="filter-btn" data-filter="couple">
+              Couple
+            </button>
+            <button type="button" class="filter-btn" data-filter="accessory">
+              Accessories
+            </button>
+          </div>
+        </div>
 
-      <div class="sort-box">
-        <label for="sortSelect">Sort:</label>
-        <select id="sortSelect">
-          <option value="default">Default</option>
-          <option value="low-high">Price: Low → High</option>
-          <option value="high-low">Price: High → Low</option>
-        </select>
+        <div class="toolbar-divider" aria-hidden="true"></div>
+
+        <div class="toolbar-block toolbar-block--sort">
+          <label class="toolbar-heading" for="sortSelect">Sort by</label>
+          <div class="sort-field">
+            <select id="sortSelect" class="sort-select" aria-label="Sort products by price">
+              <option value="default">Featured</option>
+              <option value="low-high">Price: Low to high</option>
+              <option value="high-low">Price: High to low</option>
+            </select>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -122,22 +147,66 @@
   </section>
 
 <!-- REVIEWS -->
-<section class="reviews" id="reviews">
-  <h2 class="section-title">Customer Reviews</h2>
+<section class="reviews" id="reviews" aria-labelledby="reviewsHeading">
+  <div class="reviews-inner">
+    <header class="reviews-header">
+      <h2 class="section-title" id="reviewsHeading">Customer Reviews</h2>
+      <p class="reviews-lead">
+        Honest feedback from shoppers—your review helps others choose with confidence.
+      </p>
+    </header>
 
-  <div class="review-container" id="reviewContainer">
-    <!-- Reviews will load here by JS -->
-  </div>
+    <div class="reviews-layout">
+      <div class="reviews-list-panel">
+        <h3 class="reviews-panel-title" id="reviewsListHeading">What people are saying</h3>
+        <div
+          class="review-container"
+          id="reviewContainer"
+          aria-labelledby="reviewsListHeading"
+        ></div>
+      </div>
 
-  <!-- WRITE REVIEW FORM -->
-  <div class="review-form">
-    <h3>Write Your Review</h3>
+      <aside class="reviews-form-panel" aria-label="Submit a review">
+        <form class="review-form" id="reviewForm" novalidate>
+          <h3 class="review-form-title">Share your experience</h3>
+          <p class="review-form-lead">
+            First name or nickname is fine. We never publish your email.
+          </p>
 
-    <input type="text" id="reviewName" placeholder="Your Name" />
-    <textarea id="reviewText" placeholder="Write your review..."></textarea>
+          <div class="review-field">
+            <label for="reviewName">Name <span class="label-optional">(optional)</span></label>
+            <input
+              type="text"
+              id="reviewName"
+              name="reviewer-name"
+              autocomplete="nickname"
+              maxlength="80"
+              placeholder="e.g. Sara"
+            />
+          </div>
 
-    <button id="submitReviewBtn">Submit Review</button>
-    <p id="reviewMsg"></p>
+          <div class="review-field">
+            <label for="reviewText">Your review <abbr class="req-mark" title="required">*</abbr></label>
+            <textarea
+              id="reviewText"
+              name="review"
+              rows="4"
+              maxlength="600"
+              placeholder="Quality, fit, shipping—what stood out?"
+              aria-describedby="reviewTextHint"
+            ></textarea>
+            <p class="review-field-hint" id="reviewTextHint">
+              At least 10 characters, up to 600.
+            </p>
+          </div>
+
+          <button type="submit" class="review-submit-btn" id="submitReviewBtn">
+            Post review
+          </button>
+          <p id="reviewMsg" class="review-msg" role="status" aria-live="polite"></p>
+        </form>
+      </aside>
+    </div>
   </div>
 </section>
 
@@ -157,10 +226,12 @@
   <!-- FOOTER -->
   <footer class="footer" id="contact">
     <div class="footer-container">
-      <img src="logo1.PNG" alt="">
-      <div>
+      <div class="footer-brand">
+        <img src="logo1.PNG" alt="Farhang Hazaragi Store logo">
+        <div class="footer-brand-text">
         <h3>Farhang Hazaragi Store</h3>
         <p>Traditional handmade fashion for everyone.</p>
+        </div>
       </div>
 
       <div>
@@ -237,28 +308,45 @@
   <!-- CHECKOUT MODAL -->
   <div class="checkout-overlay" id="checkoutOverlay"></div>
 
-  <div class="checkout-modal" id="checkoutModal">
-    <button class="close-modal" id="closeCheckoutBtn">✖</button>
+  <div class="checkout-modal" id="checkoutModal" role="dialog" aria-labelledby="checkoutHeading" aria-modal="true">
+    <button class="close-modal" id="closeCheckoutBtn" aria-label="Close checkout">✖</button>
 
-    <h2>Checkout</h2>
+    <h2 id="checkoutHeading">Checkout</h2>
+    <p class="checkout-lead">Complete your delivery details to place the order.</p>
 
-    <form id="checkoutForm">
-      <input type="text" id="fullName" placeholder="Full Name" required />
-      <input type="text" id="address" placeholder="Address" required />
-      <input type="tel" id="phone" placeholder="Phone Number" required />
+    <form id="checkoutForm" novalidate>
+      <div class="checkout-field">
+        <label for="fullName">Full Name</label>
+        <input type="text" id="fullName" placeholder="e.g. Ali Hussain" autocomplete="name" required />
+      </div>
 
-      <select id="paymentMethod" required>
-        <option value="">Select Payment Method</option>
-        <option value="cash">Cash on Delivery</option>
-        <option value="card">Credit Card (Demo)</option>
-      </select>
+      <div class="checkout-field">
+        <label for="address">Delivery Address</label>
+        <input type="text" id="address" placeholder="Street, city, area" autocomplete="street-address" required />
+      </div>
 
-      <button class="checkout-btn" type="submit">Confirm Order</button>
+      <div class="checkout-field">
+        <label for="phone">Phone Number</label>
+        <input type="tel" id="phone" placeholder="07XXXXXXXX" inputmode="tel" autocomplete="tel" required />
+      </div>
+
+      <div class="checkout-field">
+        <label for="paymentMethod">Payment Method</label>
+        <select id="paymentMethod" required>
+          <option value="">Select Payment Method</option>
+          <option value="cash">Cash on Delivery</option>
+          <option value="card">Credit Card (Demo)</option>
+        </select>
+      </div>
+
+      <button class="checkout-btn checkout-submit-btn" type="submit">Place Order</button>
+      <p class="checkout-msg" id="checkoutMsg" role="status" aria-live="polite"></p>
     </form>
 
     <p class="success-msg" id="successMsg"></p>
   </div>
 
+  <script src="catalog.js"></script>
   <script src="index.js"></script>
 </body>
 </html>

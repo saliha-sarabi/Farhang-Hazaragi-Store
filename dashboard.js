@@ -9,17 +9,9 @@ document.getElementById("adminName").textContent =
   localStorage.getItem("adminName") || "Admin";
 
 // ===========================
-// DEFAULT PRODUCTS (IF EMPTY)
+// PRODUCTS (shared loader + migration)
 // ===========================
-const defaultProducts = [
-  { id: 1, name: "Women Dress", price: 35, category: "women", images: ["IMG_1025.jpg"], desc: "Elegant handmade women dress." },
-  { id: 2, name: "Hand Craft Trouser", price: 50, category: "women", images: ["IMG_1131.PNG"], desc: "Traditional handmade trouser." },
-  { id: 3, name: "Men Hat", price: 30, category: "men", images: ["IMG_1168.PNG"], desc: "Traditional hat for men." }
-];
-
-if (!localStorage.getItem("products")) {
-  localStorage.setItem("products", JSON.stringify(defaultProducts));
-}
+let products = loadAndPersistStoreCatalog();
 
 // ===========================
 // ELEMENTS
@@ -28,6 +20,7 @@ const productForm = document.getElementById("productForm");
 const productsContainer = document.getElementById("productsContainer");
 const ordersContainer = document.getElementById("ordersContainer");
 const productMsg = document.getElementById("productMsg");
+const sidebarLinks = Array.from(document.querySelectorAll('.sidebar a[href^="#"]'));
 
 const totalProducts = document.getElementById("totalProducts");
 const totalOrders = document.getElementById("totalOrders");
@@ -36,8 +29,62 @@ const totalRevenue = document.getElementById("totalRevenue");
 // ===========================
 // LOAD DATA
 // ===========================
-let products = JSON.parse(localStorage.getItem("products")) || [];
 let orders = JSON.parse(localStorage.getItem("orders")) || [];
+
+// ===========================
+// SIDEBAR ACTIVE LINK
+// ===========================
+function setActiveSidebarLink(targetId) {
+  sidebarLinks.forEach((link) => {
+    const isActive = link.getAttribute("href") === `#${targetId}`;
+    link.classList.toggle("active", isActive);
+  });
+}
+
+function setupSidebarActiveTracking() {
+  if (!sidebarLinks.length) return;
+
+  const sectionIds = ["dashboard-home", "products", "orders"];
+  const sections = sectionIds
+    .map((id) => document.getElementById(id))
+    .filter(Boolean);
+
+  sidebarLinks.forEach((link) => {
+    link.addEventListener("click", () => {
+      const hash = link.getAttribute("href");
+      if (!hash || hash === "#") return;
+      setActiveSidebarLink(hash.replace("#", ""));
+    });
+  });
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const visibleSections = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+
+      if (visibleSections.length > 0) {
+        setActiveSidebarLink(visibleSections[0].target.id);
+      } else if (window.scrollY < 120) {
+        setActiveSidebarLink("dashboard-home");
+      }
+    },
+    {
+      root: null,
+      threshold: [0.2, 0.45, 0.7],
+      rootMargin: "-20% 0px -45% 0px"
+    }
+  );
+
+  sections.forEach((section) => observer.observe(section));
+
+  const initialHash = window.location.hash.replace("#", "");
+  if (sectionIds.includes(initialHash)) {
+    setActiveSidebarLink(initialHash);
+  } else {
+    setActiveSidebarLink("dashboard-home");
+  }
+}
 
 // ===========================
 // RENDER PRODUCTS
@@ -51,7 +98,7 @@ function renderProducts() {
 
     div.innerHTML = `
       <div style="display:flex; gap:10px; align-items:center;">
-        <img src="${p.images?.[0] || "placeholder.jpg"}" alt="${p.name}">
+        <img alt="${p.name}">
         <div>
           <p><b>${p.name}</b></p>
           <p>$${p.price} | ${p.category}</p>
@@ -61,6 +108,9 @@ function renderProducts() {
     `;
 
     productsContainer.appendChild(div);
+
+    const imgEl = div.querySelector("img");
+    bindProductImage(imgEl, p.images?.[0] || "placeholder.jpg");
   });
 
   totalProducts.textContent = products.length;
@@ -117,7 +167,12 @@ function renderOrders() {
   ordersContainer.innerHTML = "";
 
   if (orders.length === 0) {
-    ordersContainer.innerHTML = "<p>No orders yet.</p>";
+    ordersContainer.innerHTML = `
+      <div class="orders-empty">
+        <h3>No orders yet</h3>
+        <p>Orders placed by customers will appear here.</p>
+      </div>
+    `;
     totalOrders.textContent = "0";
     totalRevenue.textContent = "$0";
     return;
@@ -127,32 +182,45 @@ function renderOrders() {
 
   orders.forEach((o) => {
     revenue += o.total;
+    const orderItems = Array.isArray(o.items) ? o.items : [];
+    const itemsCount = orderItems.reduce((count, item) => count + (item.qty || 0), 0);
 
     const div = document.createElement("div");
     div.classList.add("order-card");
 
     div.innerHTML = `
-      <p><b>Order ID:</b> ${o.id}</p>
-      <p><b>Date:</b> ${o.date}</p>
-      <p><b>Customer:</b> ${o.customerName}</p>
-      <p><b>Phone:</b> ${o.phone}</p>
-      <p><b>Address:</b> ${o.address}</p>
-      <p><b>Payment:</b> ${o.paymentMethod}</p>
-      <p><b>Total:</b> $${o.total}</p>
+      <div class="order-card-header">
+        <div>
+          <p class="order-id">Order #${o.id}</p>
+          <p class="order-date">${o.date || "N/A"}</p>
+        </div>
+        <p class="order-total">$${Number(o.total || 0).toFixed(2)}</p>
+      </div>
 
-      <p><b>Items:</b></p>
-      <ul>
-        ${o.items.map(item => `<li>${item.name} (x${item.qty}) - $${item.price}</li>`).join("")}
-      </ul>
+      <div class="order-meta">
+        <span class="order-chip">${itemsCount} item${itemsCount === 1 ? "" : "s"}</span>
+        <span class="order-chip order-chip--payment">${o.paymentMethod || "Unknown payment"}</span>
+      </div>
 
-      <hr>
+      <div class="order-details">
+        <p><b>Customer:</b> ${o.customerName || "N/A"}</p>
+        <p><b>Phone:</b> ${o.phone || "N/A"}</p>
+        <p><b>Address:</b> ${o.address || "N/A"}</p>
+      </div>
+
+      <div class="order-items-wrap">
+        <p class="order-items-title">Items</p>
+        <ul class="order-items-list">
+          ${orderItems.map((item) => `<li><span>${item.name}</span><span>x${item.qty} • $${item.price}</span></li>`).join("")}
+        </ul>
+      </div>
     `;
 
     ordersContainer.appendChild(div);
   });
 
   totalOrders.textContent = orders.length;
-  totalRevenue.textContent = "$" + revenue;
+  totalRevenue.textContent = "$" + revenue.toFixed(2);
 }
 
 // ===========================
@@ -169,3 +237,4 @@ document.getElementById("logoutBtn").addEventListener("click", function () {
 // ===========================
 renderProducts();
 renderOrders();
+setupSidebarActiveTracking();

@@ -74,3 +74,54 @@ button:hover {
   color: #1f6ae1;
   text-decoration: none;
 }
+
+/* Customer dashboard (reuses .container) */
+body:has(.customer-dash) {
+  align-items: flex-start;
+  padding: 24px 12px;
+  min-height: 100vh;
+  height: auto;
+}
+
+.customer-dash {
+  width: 100%;
+  max-width: 480px;
+  max-height: none;
+  text-align: left;
+}
+
+.customer-dash h2,
+.customer-dash > .subtitle,
+.customer-dash > .link {
+  text-align: center;
+}
+
+.dash-section-title {
+  margin: 20px 0 10px;
+  font-size: 1rem;
+  color: #0b1f3b;
+}
+
+.customer-orders {
+  max-height: 50vh;
+  overflow-y: auto;
+  text-align: left;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.customer-order-card {
+  background: #f9f9f9;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+
+.customer-order-card ul {
+  margin: 6px 0 0 18px;
+}
+
+.customer-dash button {
+  width: 100%;
+  margin-top: 8px;
+}
